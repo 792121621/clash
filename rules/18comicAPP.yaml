@@ -1,8 +1,4 @@
 payload:
-    - www.cdnmhwscc.vip
-    - www.cdnblackmyth.club
-    - www.cdnmhws.cc
-    - www.cdnuc.vip
-    - *.jmapiproxy1.cc
-    - *.jmapiproxy2.cc
-    - *.jmapiproxy3.cc
+- '.blogger.com'
+- '*.*.microsoft.com'
+- 'books.itunes.apple.com'
