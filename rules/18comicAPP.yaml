@@ -3,6 +3,6 @@ payload:
     - www.cdnblackmyth.club
     - www.cdnmhws.cc
     - www.cdnuc.vip
-    - *.jmapiproxy1.cc
-    - *.jmapiproxy2.cc
-    - *.jmapiproxy3.cc
+    - +.jmapiproxy1.cc
+    - +.jmapiproxy2.cc
+    - +.jmapiproxy3.cc
