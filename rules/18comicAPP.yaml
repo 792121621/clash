@@ -1,8 +1,10 @@
 payload:
+    # 以下是18comicAPP进入页面地址
     - www.cdnmhwscc.vip
     - www.cdnblackmyth.club
     - www.cdnmhws.cc
     - www.cdnuc.vip
+    # 以下是18comicAPP加载图片地址
     - *.jmapiproxy1.cc
     - *.jmapiproxy2.cc
     - *.jmapiproxy3.cc
