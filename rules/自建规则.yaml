@@ -2,3 +2,7 @@ payload:
     # 以下是youtuber七尺宇博客
     - www.qichiyu.com
     - qichiyu.com
+    - +.data-detect.nie.netease.com
+    - +.unisdk.proxima.nie.netease.com
+    - +.acsdk.gameyw.netease.com
+    - +.nos.gameyw.netease.com
