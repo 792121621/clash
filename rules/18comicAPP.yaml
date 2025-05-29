@@ -1,8 +1,8 @@
 payload:
     # 以下是18comicAPP进入页面地址
     - www.cdnmhwscc.vip
-    - www.cdnblackmyth.club
-    - www.cdnmhws.cc
+    - www.cdnuc.org
+    - www.cdnplaystation6.org
     - www.cdnuc.vip
     # 以下是18comicAPP加载图片地址  *在yaml是特殊字符需要需要单引号
     - '*.jmapiproxy1.cc'
