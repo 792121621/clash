@@ -1,6 +1,4 @@
 payload:
     # 以下是乐播投屏更新地址
     # - +.hpplay.cn
-    #- activity.hpplay.cn
-    - rp.hpplay.cn
-    
+    - activity.hpplay.cn
