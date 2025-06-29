@@ -1,9 +1,7 @@
 payload:
-    # 以下是youtuber七尺宇博客
-    - +.qichiyu.com
-    - www.digitalnomadlc.com
+    # 以下是乐播投屏更新地址
+    # - +.hpplay.cn
+    - activity.hpplay.cn
+    - adeng.hpplay.cn
+    - rp.hpplay.cn
     
-    # 以下是x上视频
-    - +.gofile.io
-    # 以下是平时用到的网站
-    - www.esjzone.cc
