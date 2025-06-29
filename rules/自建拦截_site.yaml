@@ -1,7 +1,7 @@
 payload:
     # 以下是乐播投屏更新地址
     # - +.hpplay.cn
-    - activity.hpplay.cn
+    #- activity.hpplay.cn
     - adeng.hpplay.cn
-    - rp.hpplay.cn
+    #- rp.hpplay.cn
     
