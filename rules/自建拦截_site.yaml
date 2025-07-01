@@ -6,6 +6,6 @@ payload:
     #- ic.adobe.io
     #- cc-api-data.adobe.io
     #- +.adobe.com
-    - +.adobestats.io
-    #- +.adobe.io
+    #- +.adobestats.io
+    - +.adobe.io
     
