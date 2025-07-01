@@ -3,11 +3,6 @@ payload:
     # - +.hpplay.cn
     - activity.hpplay.cn
     # 以下是Photoshop更新地址
-    #- ic.adobe.io
-    #- cc-api-data.adobe.io
-    #- +.adobe.com
-    #- +.adobestats.io
-    #- +.adobe.io
-    #- 3ubq3714f3.adobestats.io
+    - 3ubq3714f3.adobestats.io
     - cc-api-data.adobe.io
     - ic.adobe.io
