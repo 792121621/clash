@@ -7,6 +7,6 @@ payload:
     #- cc-api-data.adobe.io
     #- +.adobe.com
     #- +.adobestats.io
-    - +.adobe.io
+    #- +.adobe.io
     - 3ubq3714f3.adobestats.io
     
