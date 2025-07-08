@@ -9,3 +9,6 @@ payload:
     - '*.jmapiproxy2.cc'
     - '*.jmapiproxy3.cc'
     - '*.jmapinodeudzn.net'
+    # 以下是hanime网址
+    - hanime1.com
+    - hanime1.me
