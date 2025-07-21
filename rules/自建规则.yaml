@@ -9,9 +9,9 @@ payload:
     - www.netflixgc.com
     - cjbfq.netflixgc.tv
     - vip.ffzy-play10.com
-    - json.ksdiy.cn
-    - pic.imgdb.cn
+    #- json.ksdiy.cn
+    #- pic.imgdb.cn
     - c1.maxana.tacool.com
-    - polyfill-js.cn
+    #- polyfill-js.cn
     # 以下是平时用到的网站
     - www.esjzone.cc
