@@ -7,6 +7,6 @@ payload:
     - +.gofile.io
     # 以下是平时看电影的网站
     - www.netflixgc.com
-    #- cjbfq.netflixgc.tv
+    - cjbfq.netflixgc.tv
     # 以下是平时用到的网站
     - www.esjzone.cc
