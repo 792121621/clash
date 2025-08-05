@@ -3,7 +3,7 @@ payload:
     # - +.hpplay.cn
     - activity.hpplay.cn #强制更新
     - hotupgrade.hpplay.cn #限制观看次数
-    # - gslb.hpplay.cn
+    - gslb.hpplay.cn
     # - imdns.hpplay.cn
     # 以下是Photoshop更新地址
     - '*.adobestats.io' #3ubq3714f3.adobestats.io to8byuxf3g.adobestats.io
