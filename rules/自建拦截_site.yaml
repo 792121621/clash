@@ -1,6 +1,6 @@
 payload:
     # 以下是乐播投屏更新地址
-    # - +.hpplay.cn
+    - +.hpplay.cn
     - activity.hpplay.cn
     # 以下是Photoshop更新地址
     - '*.adobestats.io' #3ubq3714f3.adobestats.io to8byuxf3g.adobestats.io
