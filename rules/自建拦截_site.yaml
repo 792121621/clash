@@ -2,7 +2,7 @@ payload:
     # 以下是乐播投屏更新地址
     # - +.hpplay.cn
     - activity.hpplay.cn #强制更新
-    - hotupgrade.hpplay.cn #限制观看次数
+    # - hotupgrade.hpplay.cn #限制观看次数
     - gslb.hpplay.cn
     # - imdns.hpplay.cn
     # 以下是Photoshop更新地址
