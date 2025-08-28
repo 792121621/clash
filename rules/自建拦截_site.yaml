@@ -18,5 +18,8 @@ payload:
     - auth.services.adobe.com
     - lcs-cops.adobe.io
 
+    - lcs-robs.adobe.io
+    - sstats.adobe.com
+
     
     - ic.adobe.io
