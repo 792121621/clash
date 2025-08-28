@@ -14,6 +14,9 @@ payload:
     - adobe.tt.omtrdc.net
     - assets.adobedtm.com
     - geo2.adobe.com
+    
+    - auth.services.adobe.com
+    - lcs-cops.adobe.io
 
     
     - ic.adobe.io
