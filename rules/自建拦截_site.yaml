@@ -8,6 +8,12 @@ payload:
     # 以下是Photoshop更新地址
     - '*.adobestats.io' #3ubq3714f3.adobestats.io to8byuxf3g.adobestats.io
     - cc-api-data.adobe.io #不是
+    
     - adobeid-na1.services.adobe.com
     - resources.licenses.adobe.com
+    - adobe.tt.omtrdc.net
+    - assets.adobedtm.com
+    - geo2.adobe.com
+
+    
     - ic.adobe.io
