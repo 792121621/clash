@@ -17,5 +17,5 @@ payload:
         # ======= 哔哩哔哩 ======= #
         # 哔哩哔哩
         # 阻止私有DNS
-        - httpdns.bilivideo.com # issues/51
+        #- httpdns.bilivideo.com # issues/51
     
