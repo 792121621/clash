@@ -2,6 +2,7 @@ payload:
     # 以下是bilibili ip属地
     - api.bilibili.com #B 站网页版
     - app.bilibili.com #B 站 app 版
-    #- +.bilibili.com
-    #- +.bilibili.cn
+    - +.bilibili.com
+    - +.bilibili.cn
     - +.biliapi.net
+    - +.biliapi.com
