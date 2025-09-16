@@ -7,6 +7,6 @@ payload:
     - +.biliapi.net
     - +.biliapi.com
     #- +.biligame.com
-    - +.bilicomic.com
-    - +.bilicomics.com
+    #- +.bilicomic.com
+    #- +.bilicomics.com
     - +.bilivideo.com
