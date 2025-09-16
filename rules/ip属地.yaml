@@ -5,8 +5,8 @@ payload:
     
         # ======= 哔哩哔哩 ======= #
         # 哔哩哔哩
-        - DOMAIN-SUFFIX,biliapi.net # 哔哩哔哩API域名
+        - biliapi.net # 哔哩哔哩API域名
         # - DOMAIN,api.bilibili.tv # 哔哩哔哩海外版？（使用性存疑）
-        - DOMAIN-SUFFIX,biliapi.com # 哔哩哔哩App的API域名
-        - DOMAIN-SUFFIX,bilibili.com # 哔哩哔哩全站域名，不包括内容CDN
+        - biliapi.com # 哔哩哔哩App的API域名
+        - bilibili.com # 哔哩哔哩全站域名，不包括内容CDN
         #- IP-CIDR,203.107.1.0/24 #不需要REJECT，会影响其他HTTPDNS，仅代理即可
