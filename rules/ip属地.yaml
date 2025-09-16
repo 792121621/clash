@@ -1,4 +1,4 @@
 payload:
-    # 以下是乐播投屏更新地址
+    # 以下是bilibili ip属地
     - api.bilibili.com #B 站网页版
     - api.bilibili.com #B 站 app 版
