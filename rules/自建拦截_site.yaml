@@ -9,4 +9,13 @@ payload:
     - '*.adobestats.io' #3ubq3714f3.adobestats.io to8byuxf3g.adobestats.io
     # - cc-api-data.adobe.io #不是
     - ic.adobe.io
+
+
+
+
+
+        # ======= 哔哩哔哩 ======= #
+        # 哔哩哔哩
+        # 阻止私有DNS
+        - httpdns.bilivideo.com # issues/51
     
