@@ -6,10 +6,10 @@ payload:
     - +.bilibili.cn
     - +.biliapi.net
     - +.biliapi.com
-    #- +.biligame.com
-    #- +.bilicomic.com
-    #- +.bilicomics.com
-    #- +.bilivideo.com
+    - +.biligame.com
+    - +.bilicomic.com
+    - +.bilicomics.com
+    - +.bilivideo.com
     - +.hdslb.com
 
 
