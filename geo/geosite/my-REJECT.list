@@ -1,0 +1,14 @@
+# SOURCE: 哔哩哔哩.yaml
+DOMAIN,httpdns.bilivideo.com
+
+# SOURCE: FakeLocationBiliBili.yaml
+DOMAIN-SUFFIX,httpdns.bilivideo.com
+DOMAIN-SUFFIX,httpdns.aliyuncs.com
+
+# SOURCE: FakeLocationXiaoHongShu.yaml
+DOMAIN-SUFFIX,tracker.xiaohongshu.com
+
+# SOURCE: FakeLocationZhiHu.yaml
+DOMAIN-KEYWORD,httpdns
+DOMAIN-KEYWORD,httpsdns
+DOMAIN-KEYWORD,app-analytics-services
