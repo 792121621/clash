@@ -1,0 +1,179 @@
+# SOURCE: IT之家.yaml
+DOMAIN,cmt.ithome.com
+
+# SOURCE: Lofter.yaml
+DOMAIN-SUFFIX,lofter.com
+DOMAIN,yaolu.yuedu.163.com
+
+# SOURCE: NGA.yaml
+DOMAIN,ngabbs.com
+DOMAIN,bbs.nga.cn
+DOMAIN,nga.178.com
+
+# SOURCE: QQ音乐.yaml
+DOMAIN-SUFFIX,y.qq.com
+
+# SOURCE: Soul.yaml
+DOMAIN-SUFFIX,soulapp.cn
+
+# SOURCE: TapTap.yaml
+DOMAIN,api.taptapdada.com
+
+# SOURCE: 其乐论坛.yaml
+DOMAIN,keylol.com
+
+# SOURCE: 哔哩哔哩.yaml
+DOMAIN-SUFFIX,biliapi.net
+DOMAIN-SUFFIX,biliapi.com
+DOMAIN-SUFFIX,bilibili.com
+
+# SOURCE: 头条.yaml
+DOMAIN-SUFFIX,toutiaoapi.com
+
+# SOURCE: 完美世界电竞App.yaml
+DOMAIN,api.wmpvp.com
+
+# SOURCE: 小米社区.yaml
+DOMAIN,api.vip.miui.com
+
+# SOURCE: 小红书.yaml
+DOMAIN-SUFFIX,xiaohongshu.com
+DOMAIN-KEYWORD,xiaohongshu
+
+# SOURCE: 小黑盒.yaml
+DOMAIN,api.xiaoheihe.cn
+
+# SOURCE: 微信.yaml
+DOMAIN,szshort.weixin.qq.com
+DOMAIN,szextshort.weixin.qq.com
+DOMAIN,szminorshort.weixin.qq.com
+DOMAIN,mp.weixin.qq.com
+
+# SOURCE: 微博.yaml
+DOMAIN-SUFFIX,weibo.cn
+DOMAIN-SUFFIX,weibo.com
+DOMAIN-SUFFIX,weibocdn.com
+DOMAIN-SUFFIX,wbimg.cn
+DOMAIN-SUFFIX,wbimg.com
+DOMAIN-SUFFIX,sinaimg.cn
+DOMAIN-KEYWORD,weibo
+
+# SOURCE: 快手.yaml
+DOMAIN-SUFFIX,gifshow.com
+DOMAIN-SUFFIX,ksapisrv.com
+
+# SOURCE: 懂球帝.yaml
+DOMAIN-SUFFIX,dongqiudi.com
+
+# SOURCE: 抖音.yaml
+DOMAIN-KEYWORD,core-c-lq
+DOMAIN-KEYWORD,core-lq
+DOMAIN-KEYWORD,normal-c-lq
+DOMAIN-KEYWORD,normal-lq
+DOMAIN-KEYWORD,search-quic-lq
+DOMAIN-KEYWORD,search-lq
+DOMAIN-KEYWORD,-normal-hl
+DOMAIN-KEYWORD,-normal-c-hl
+DOMAIN-KEYWORD,-core-c-hl
+DOMAIN-KEYWORD,-normal-lf
+DOMAIN-KEYWORD,-normal-c-lf
+DOMAIN-KEYWORD,-core-c-lf
+DOMAIN,sso.douyin.com
+DOMAIN,www.douyin.com
+DOMAIN-SUFFIX,snssdk.com
+
+# SOURCE: 文叔叔.yaml
+DOMAIN,www.wenshushu.cn
+
+# SOURCE: 斗鱼.yaml
+DOMAIN-SUFFIX,douyucdn.cn
+DOMAIN-SUFFIX,douyu.com
+
+# SOURCE: 森空岛.yaml
+DOMAIN,zonai.skland.com
+
+# SOURCE: 百度贴吧.yaml
+DOMAIN,tieba.baidu.com
+DOMAIN,tbmsg.baidu.com
+DOMAIN,tb5.bdstatic.com
+DOMAIN,fclog.baidu.com
+DOMAIN,gsp0.baidu.com
+DOMAIN,hm.baidu.com
+DOMAIN,www.baidu.com
+DOMAIN,tiebac.baidu.com
+DOMAIN,httpsdns.baidu.com
+DOMAIN,c.tieba.baidu.com
+DOMAIN,httpdns.baidu.com
+DOMAIN,httpdns.baidubce.com
+
+# SOURCE: 知乎.yaml
+DOMAIN-SUFFIX,zhihu.com
+
+# SOURCE: 米游社.yaml
+DOMAIN,bbs-api.mihoyo.com
+DOMAIN,bbs-api.miyoushe.com
+
+# SOURCE: 网易云音乐.yaml
+DOMAIN-SUFFIX,music.163.com
+DOMAIN,nstool.netease.com
+DOMAIN,wanproxy.127.net
+DOMAIN,mam.netease.com
+DOMAIN,dt.netease.im
+DOMAIN,api.iplay.163.com
+DOMAIN,api.k.163.com
+DOMAIN,lbs.netease.im
+DOMAIN,wannos.127.net
+DOMAIN,ac.dun.163.com
+DOMAIN-SUFFIX,music.126.net
+DOMAIN-SUFFIX,laiqukankan.com
+DOMAIN-SUFFIX,music.ntes53.netease.com
+DOMAIN-SUFFIX,music.163.com.163jiasu.com
+
+# SOURCE: 网易大神.yaml
+DOMAIN,god.gameyw.netease.com
+
+# SOURCE: 虎扑.yaml
+DOMAIN,bbs.mobileapi.hupu.com
+
+# SOURCE: 虎牙.yaml
+DOMAIN-SUFFIX,huya.com
+
+# SOURCE: 西瓜视频.yaml
+DOMAIN-SUFFIX,ixigua.com
+
+# SOURCE: 豆瓣.yaml
+DOMAIN-SUFFIX,douban.com
+
+# SOURCE: 起点App.yaml
+DOMAIN,druidv6.if.qidian.com
+DOMAIN,ptlogin6.qidian.com
+
+# SOURCE: 酷安.yaml
+DOMAIN,api.coolapk.com
+DOMAIN,api2.coolapk.com
+
+# SOURCE: FakeLocationDouYin.yaml
+DOMAIN-SUFFIX,api6-core-lf.amemv.com
+
+# SOURCE: FakeLocationKuaiShou.yaml
+DOMAIN-KEYWORD,gifshow.com
+DOMAIN-KEYWORD,ksapisrv.com
+
+# SOURCE: FakeLocationTieBa.yaml
+DOMAIN-SUFFIX,httpdns.baidu.com
+DOMAIN-SUFFIX,httpdns.baidubce.com
+
+# SOURCE: FakeLocationXianYu.yaml
+DOMAIN-SUFFIX,guide-acs.taobao.com
+DOMAIN-SUFFIX,h-adashx.ut.taobao.com
+DOMAIN-SUFFIX,adashx.m.taobao.com
+DOMAIN-SUFFIX,amdc.m.taobao.com
+DOMAIN,dns.alidns.com
+DOMAIN-KEYWORD,acs.m.goofish.com
+
+# SOURCE: FakeLocationXiaoHongShu.yaml
+DOMAIN-SUFFIX,edith.xiaohongshu.com
+DOMAIN-SUFFIX,www.xiaohongshu.com
+
+# SOURCE: FakeLocationXiaoHongShu_No_Resolve.yaml
+DOMAIN-SUFFIX,tracker.xiaohongshu.com
