@@ -34,6 +34,12 @@ jobs:
           # 路径相对于上游仓库根目录（也可相对于所拉取的目录），例如：rules/某规则.yaml
           echo "EXCLUDE_PATHS=" >> "$GITHUB_ENV"
 
+          # IP 规则的 no-resolve 处理方式（只影响 IP-CIDR / IP-CIDR6）：
+          #   0 = 保持拉取时的原样（上游写了就带，没写就不带）
+          #   1 = 全部加上 no-resolve
+          #   2 = 全部去掉 no-resolve
+          echo "NO_RESOLVE=0" >> "$GITHUB_ENV"
+
       # 3. 拉取上游 .yaml 文件
       - name: Pull Upstream YAML Files
         shell: bash
@@ -159,7 +165,7 @@ jobs:
           REJECT_POLICIES = {'REJECT', 'REJECT-DROP'}
           DIRECT_POLICIES = {'DIRECT'}
           CATEGORIES = ['REJECT', 'DIRECT', 'IPLocation']      # -> my-<name>.list
-          IP_SUFFIX = ',no-resolve'    # geoip .list lines; set to '' to drop it
+          NO_RESOLVE = 0    # set by --no-resolve: 0 keep as pulled / 1 add to all / 2 remove from all
           TARGETS = {
               'site': ['geo/geosite', 'geo-lite/geosite'],
               'ip': ['geo/geoip', 'geo-lite/geoip'],
@@ -174,20 +180,20 @@ jobs:
               """domain / ipcidr behavior text (no comma): 'a.com', '+.a.com', '1.2.3.0/24'."""
               try:
                   net = ipaddress.ip_network(v, strict=False)
-                  return ('ip', ('IP-CIDR6' if net.version == 6 else 'IP-CIDR', str(net)), '')
+                  return ('ip', ('IP-CIDR6' if net.version == 6 else 'IP-CIDR', str(net)), '', False)
               except ValueError:
                   pass
               if v.startswith(('+.', '.')):
                   value = v.lstrip('+').lstrip('.').lower()
                   if DOMAIN_RE.match(value):
-                      return ('site', ('DOMAIN-SUFFIX', value), '')
+                      return ('site', ('DOMAIN-SUFFIX', value), '', False)
               elif '.' in v and DOMAIN_RE.match(v.lower()):
-                  return ('site', ('DOMAIN', v.lower()), '')
+                  return ('site', ('DOMAIN', v.lower()), '', False)
               return None
 
 
           def parse_item(raw, need_dash):
-              """-> None | ('skip'|'bad', rtype) | (kind, (rtype, value), policy)"""
+              """-> None | ('skip'|'bad', rtype) | (kind, (rtype, value), policy, no_resolve)"""
               line = raw.strip()
               if not line or line.startswith('#'):
                   return None
@@ -227,16 +233,17 @@ jobs:
                   value = value.lstrip('+').lstrip('.').lower()
                   if not DOMAIN_RE.match(value):
                       return ('bad', rtype)
-                  return ('site', (rtype, value), policy)
+                  return ('site', (rtype, value), policy, False)
               if rtype == 'DOMAIN-KEYWORD':
                   value = value.lower()
               if rtype in ('DOMAIN-KEYWORD', 'DOMAIN-REGEX'):
-                  return ('site', (rtype, value), policy) if value else ('bad', rtype)
+                  return ('site', (rtype, value), policy, False) if value else ('bad', rtype)
               try:
                   net = ipaddress.ip_network(value, strict=False)
               except ValueError:
                   return ('bad', rtype)
-              return ('ip', ('IP-CIDR6' if net.version == 6 else 'IP-CIDR', str(net)), policy)
+              nr = any(p.lower() == 'no-resolve' for p in parts[2:])
+              return ('ip', ('IP-CIDR6' if net.version == 6 else 'IP-CIDR', str(net)), policy, nr)
 
 
           def category(policy):
@@ -247,8 +254,14 @@ jobs:
               return 'IPLocation'
 
 
-          def fmt(kind, key):
-              return '%s,%s%s' % (key[0], key[1], IP_SUFFIX if kind == 'ip' else '')
+          def fmt(kind, key, nr):
+              line = '%s,%s' % (key[0], key[1])
+              if kind != 'ip':
+                  return line
+              # NO_RESOLVE: 0 keep as pulled / 1 add to all / 2 remove from all
+              if NO_RESOLVE == 1 or (NO_RESOLVE == 0 and nr):
+                  line += ',no-resolve'
+              return line
 
 
           def collect(src_dir):
@@ -273,12 +286,12 @@ jobs:
                               if t[0] == 'bad':
                                   bad[t[1]] += 1
                                   continue
-                              kind, key, policy = t
+                              kind, key, policy, nr = t
                               cat = category(policy)
                               if (kind, cat, key) in seen:
                                   continue
                               seen.add((kind, cat, key))
-                              rules[kind][cat].append(key)
+                              rules[kind][cat].append((key, nr))
                       sources.append((fn, rules))
                       print('%-40s site: %s | ip: %s' % (
                           fn,
@@ -323,10 +336,10 @@ jobs:
               out, added, nblocks = list(manual), 0, 0
               for name, keys in blocks:
                   lines = []
-                  for key in keys:
+                  for key, nr in keys:
                       if key not in seen:
                           seen.add(key)
-                          lines.append(fmt(kind, key))
+                          lines.append(fmt(kind, key, nr))
                   if not lines:
                       continue
                   if out:
@@ -351,7 +364,11 @@ jobs:
               ap = argparse.ArgumentParser()
               ap.add_argument('--src', required=True, help='directory holding the pulled *.yaml files')
               ap.add_argument('--root', default='.', help='repo root (custom branch checkout)')
+              ap.add_argument('--no-resolve', type=int, choices=[0, 1, 2], default=0,
+                              help='IP rules: 0 keep as pulled / 1 add no-resolve to all / 2 remove from all')
               args = ap.parse_args()
+              global NO_RESOLVE
+              NO_RESOLVE = args.no_resolve
 
               sources = collect(args.src)
               total = sum(len(v) for _, r in sources for k in r.values() for v in k.values())
@@ -372,7 +389,7 @@ jobs:
               main()
 
           PYEOF
-          python3 "$RUNNER_TEMP/clean_yaml.py" --src "$UPSTREAM_DIR" --root "$GITHUB_WORKSPACE"
+          python3 "$RUNNER_TEMP/clean_yaml.py" --src "$UPSTREAM_DIR" --root "$GITHUB_WORKSPACE" --no-resolve "${NO_RESOLVE:-0}"
 
       # 5. 自动提交更改（内容无变化时不会产生提交）
       - name: Auto Commit Changes
