@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": "ic.adobe.io",
+      "domain_suffix": [
+        "httpdns.aliyuncs.com",
+        "httpdns.bilivideo.com",
+        "tracker.xiaohongshu.com"
+      ],
+      "domain_keyword": [
+        "app-analytics-services",
+        "httpdns",
+        "httpsdns"
+      ]
+    }
+  ]
+}
