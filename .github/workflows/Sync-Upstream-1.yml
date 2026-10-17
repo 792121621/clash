@@ -1,0 +1,382 @@
+name: Sync Upstream Rules
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  schedule:
+    - cron: "0 1 1 * *" # 每月1号1点自动运行
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 初始化本地仓库（规则文件位于 custom 分支）
+      - name: Checkout Target Repository
+        uses: actions/checkout@main
+        with:
+          ref: custom # 自己的仓库分支
+          fetch-depth: 0
+
+      # 2. 设置上游目录及保留路径
+      - name: Configure Upstream Repository
+        shell: bash
+        run: |
+          # 上游目录，格式：owner/repo/tree/branch/目录，多个用 | 分隔；只拉取其中的 .yaml 文件
+          echo "SOURCE_REPO=SunsetMkt/anti-ip-attribution/tree/main/rules|Accademia/Additional_Rule_For_Clash/tree/main/FakeLocation" >> "$GITHUB_ENV"
+
+          # 需要从拉取源中排除的文件或文件夹，使用 | 分隔（留空则不排除）
+          # 路径相对于上游仓库根目录（也可相对于所拉取的目录），例如：rules/某规则.yaml
+          echo "EXCLUDE_PATHS=" >> "$GITHUB_ENV"
+
+      # 3. 拉取上游 .yaml 文件
+      - name: Pull Upstream YAML Files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          UPSTREAM_DIR="$RUNNER_TEMP/upstream"
+          rm -rf "$UPSTREAM_DIR"
+          mkdir -p "$UPSTREAM_DIR"
+
+          IFS='|' read -r -a SOURCES <<< "$SOURCE_REPO"
+
+          # 解析并校验需要从拉取源中排除的路径
+          IFS='|' read -r -a EXCLUDE_ARRAY <<< "$EXCLUDE_PATHS"
+          EXCLUDES=()
+          for path in "${EXCLUDE_ARRAY[@]}"; do
+            path="$(printf '%s' "$path" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            path="${path%/}"
+            [ -n "$path" ] || continue
+
+            # 拒绝绝对路径及目录穿越路径
+            if [[ "$path" = /* || "$path" == "." || "$path" == ".." || "$path" == ../* || "$path" == */../* || "$path" == */.. ]]; then
+              echo "::error::不允许的排除路径：$path"
+              exit 1
+            fi
+
+            # 不允许排除 Git 元数据目录
+            if [[ "$path" == ".git" || "$path" == ".git/"* ]]; then
+              echo "::error::不能将 .git 作为排除路径。"
+              exit 1
+            fi
+            EXCLUDES+=("$path")
+          done
+
+          if [ "${#EXCLUDES[@]}" -gt 0 ]; then
+            echo "以下路径将从拉取源中排除："
+            printf ' - %s\n' "${EXCLUDES[@]}"
+          fi
+
+          idx=0
+          for src in "${SOURCES[@]}"; do
+            src="$(printf '%s' "$src" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            [ -n "$src" ] || continue
+            src="${src#https://github.com/}"
+            src="${src%/}"
+
+            # owner/repo/tree/branch/dir
+            IFS='/' read -r owner repo marker branch dir <<< "$src"
+            if [ "$marker" != "tree" ] || [ -z "$owner" ] || [ -z "$repo" ] || [ -z "$branch" ] || [ -z "$dir" ]; then
+              echo "::error::SOURCE_REPO 格式错误：$src （应为 owner/repo/tree/branch/目录）"
+              exit 1
+            fi
+            case "/$dir/" in
+              */../*) echo "::error::不允许的目录：$dir"; exit 1 ;;
+            esac
+
+            idx=$((idx + 1))
+            work="$RUNNER_TEMP/src-$idx"
+            rm -rf "$work"
+
+            echo "正在获取上游目录：$owner/$repo ($branch) /$dir"
+            git clone --quiet --depth=1 --filter=blob:none --sparse \
+              --branch "$branch" "https://github.com/${owner}/${repo}.git" "$work"
+            git -C "$work" sparse-checkout set "$dir"
+
+            if [ ! -d "$work/$dir" ]; then
+              echo "::error::上游目录不存在：$src"
+              exit 1
+            fi
+
+            # 删除被排除的文件或文件夹（相对仓库根目录或所拉取目录）
+            for path in "${EXCLUDES[@]}"; do
+              rm -rf -- "${work:?}/$path" "${work:?}/$dir/$path"
+            done
+
+            dest="$UPSTREAM_DIR/$(printf '%02d' "$idx")-${owner}-${repo}"
+            mkdir -p "$dest"
+
+            count=0
+            while IFS= read -r -d '' f; do
+              rel="${f#"$work/$dir/"}"
+              mkdir -p "$dest/$(dirname "$rel")"
+              cp -- "$f" "$dest/$rel"
+              count=$((count + 1))
+            done < <(find "$work/$dir" -type f -name '*.yaml' -print0 | sort -z)
+
+            echo "已拉取 ${count} 个 .yaml 文件"
+            if [ "$count" -eq 0 ]; then
+              echo "::error::目录下没有 .yaml 文件：$src"
+              exit 1
+            fi
+          done
+
+          if [ "$idx" -eq 0 ]; then
+            echo "::error::SOURCE_REPO 为空。"
+            exit 1
+          fi
+
+          echo "UPSTREAM_DIR=$UPSTREAM_DIR" >> "$GITHUB_ENV"
+
+      # 4. 清洗 .yaml 并合并到 my-*.list
+      - name: Clean And Merge Rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/clean_yaml.py" <<'PYEOF'
+          #!/usr/bin/env python3
+          """Clean upstream clash *.yaml rules into geosite / geoip *.list data and merge
+          them into my-REJECT.list / my-DIRECT.list / my-IPLocation.list."""
+          import argparse
+          import ipaddress
+          import os
+          import re
+          import sys
+          from collections import Counter
+
+          MARK = '# SOURCE: '          # first line of every merged source block
+          DOMAIN_RE = re.compile(r'^[a-z0-9_.-]+$')
+          POLICY_RE = re.compile(r'^[^\s,(){}\[\]\\^$*+?|]+$')
+          FLAGS = {'no-resolve', 'src'}
+          DOMAIN_TYPES = {'DOMAIN', 'DOMAIN-SUFFIX', 'DOMAIN-KEYWORD', 'DOMAIN-REGEX'}
+          IP_TYPES = {'IP-CIDR', 'IP-CIDR6'}
+          REJECT_POLICIES = {'REJECT', 'REJECT-DROP'}
+          DIRECT_POLICIES = {'DIRECT'}
+          CATEGORIES = ['REJECT', 'DIRECT', 'IPLocation']      # -> my-<name>.list
+          TARGETS = {
+              'site': ['geo/geosite', 'geo-lite/geosite'],
+              'ip': ['geo/geoip', 'geo-lite/geoip'],
+          }
+
+
+          def warn(msg):
+              print('::warning::' + msg, flush=True)
+
+
+          def bare_item(v):
+              """domain / ipcidr behavior text (no comma): 'a.com', '+.a.com', '1.2.3.0/24'."""
+              try:
+                  net = ipaddress.ip_network(v, strict=False)
+                  return ('ip', ('IP-CIDR6' if net.version == 6 else 'IP-CIDR', str(net)), '')
+              except ValueError:
+                  pass
+              if v.startswith(('+.', '.')):
+                  value = v.lstrip('+').lstrip('.').lower()
+                  if DOMAIN_RE.match(value):
+                      return ('site', ('DOMAIN-SUFFIX', value), '')
+              elif '.' in v and DOMAIN_RE.match(v.lower()):
+                  return ('site', ('DOMAIN', v.lower()), '')
+              return None
+
+
+          def parse_item(raw, need_dash):
+              """-> None | ('skip'|'bad', rtype) | (kind, (rtype, value), policy)"""
+              line = raw.strip()
+              if not line or line.startswith('#'):
+                  return None
+              m = re.match(r'-\s+(.*)$', line)
+              if m:
+                  line = m.group(1)
+              elif need_dash:
+                  return None
+              line = re.sub(r'\s+#.*$', '', line).strip()          # inline comment
+              if len(line) >= 2 and line[0] == line[-1] and line[0] in '\'"':
+                  line = line[1:-1].strip()
+              if not line:
+                  return None
+              parts = [p.strip() for p in line.split(',')]
+              if len(parts) == 1:
+                  return bare_item(parts[0])
+              rtype = parts[0].upper()
+              if rtype not in DOMAIN_TYPES | IP_TYPES:
+                  return ('skip', rtype)          # AND/OR/GEOIP/PROCESS-NAME/... can't go into .list
+
+              policy = ''
+              if rtype == 'DOMAIN-REGEX':         # a regex may itself contain commas
+                  toks = parts[1:]
+                  while toks and toks[-1].lower() in FLAGS:
+                      toks.pop()
+                  if len(toks) >= 2 and POLICY_RE.match(toks[-1]):
+                      policy = toks.pop().upper()
+                  value = ','.join(toks)
+              else:
+                  value = parts[1]
+                  for p in parts[2:]:
+                      if p and p.lower() not in FLAGS:
+                          policy = p.upper()
+                          break
+
+              if rtype in ('DOMAIN', 'DOMAIN-SUFFIX'):
+                  value = value.lstrip('+').lstrip('.').lower()
+                  if not DOMAIN_RE.match(value):
+                      return ('bad', rtype)
+                  return ('site', (rtype, value), policy)
+              if rtype == 'DOMAIN-KEYWORD':
+                  value = value.lower()
+              if rtype in ('DOMAIN-KEYWORD', 'DOMAIN-REGEX'):
+                  return ('site', (rtype, value), policy) if value else ('bad', rtype)
+              try:
+                  net = ipaddress.ip_network(value, strict=False)
+              except ValueError:
+                  return ('bad', rtype)
+              return ('ip', ('IP-CIDR6' if net.version == 6 else 'IP-CIDR', str(net)), policy)
+
+
+          def category(policy):
+              if policy in REJECT_POLICIES:
+                  return 'REJECT'
+              if policy in DIRECT_POLICIES:
+                  return 'DIRECT'
+              return 'IPLocation'
+
+
+          def fmt(kind, key):
+              return '%s,%s' % (key[0], key[1])
+
+
+          def collect(src_dir):
+              """-> [(file name, {kind: {category: [key, ...]}})] in a stable order"""
+              sources = []
+              skipped, bad = Counter(), Counter()
+              for root, dirs, files in os.walk(src_dir):
+                  dirs.sort()
+                  for fn in sorted(files):
+                      if not fn.endswith('.yaml'):
+                          continue
+                      rules = {k: {c: [] for c in CATEGORIES} for k in TARGETS}
+                      seen = set()
+                      with open(os.path.join(root, fn), encoding='utf-8-sig', errors='ignore') as f:
+                          for raw in f:
+                              t = parse_item(raw, True)
+                              if t is None:
+                                  continue
+                              if t[0] == 'skip':
+                                  skipped[t[1]] += 1
+                                  continue
+                              if t[0] == 'bad':
+                                  bad[t[1]] += 1
+                                  continue
+                              kind, key, policy = t
+                              cat = category(policy)
+                              if (kind, cat, key) in seen:
+                                  continue
+                              seen.add((kind, cat, key))
+                              rules[kind][cat].append(key)
+                      sources.append((fn, rules))
+                      print('%-40s site: %s | ip: %s' % (
+                          fn,
+                          ' '.join('%s=%d' % (c, len(rules['site'][c])) for c in CATEGORIES),
+                          ' '.join('%s=%d' % (c, len(rules['ip'][c])) for c in CATEGORIES)))
+              if skipped:
+                  print('skipped (not representable in .list): ' + ', '.join('%s x%d' % kv for kv in sorted(skipped.items())))
+              if bad:
+                  warn('invalid values ignored: ' + ', '.join('%s x%d' % kv for kv in sorted(bad.items())))
+              return sources
+
+
+          def split_existing(text):
+              """Drop old '# SOURCE:' blocks (until a blank line); keep everything else as-is."""
+              manual, in_block = [], False
+              for line in text.splitlines():
+                  if line.startswith(MARK):
+                      in_block = True
+                      continue
+                  if in_block:
+                      if not line.strip():
+                          in_block = False
+                      continue
+                  manual.append(line)
+              while manual and not manual[-1].strip():
+                  manual.pop()
+              return manual
+
+
+          def merge(path, kind, blocks):
+              existed = os.path.isfile(path)
+              existing = ''
+              if existed:
+                  with open(path, encoding='utf-8-sig', errors='ignore') as f:
+                      existing = f.read()
+              manual = split_existing(existing)
+              seen = set()                      # rules already present -> never duplicated
+              for line in manual:
+                  t = parse_item(line, False)
+                  if t and t[0] == kind:
+                      seen.add(t[1])
+              out, added, nblocks = list(manual), 0, 0
+              for name, keys in blocks:
+                  lines = []
+                  for key in keys:
+                      if key not in seen:
+                          seen.add(key)
+                          lines.append(fmt(kind, key))
+                  if not lines:
+                      continue
+                  if out:
+                      out.append('')
+                  out.append(MARK + name)
+                  out.extend(lines)
+                  added += len(lines)
+                  nblocks += 1
+              if not existed and not out:
+                  return
+              text = '\n'.join(out) + '\n' if out else ''
+              if text == existing:
+                  print('unchanged  %s' % path)
+                  return
+              os.makedirs(os.path.dirname(path), exist_ok=True)
+              with open(path, 'w', encoding='utf-8', newline='\n') as f:
+                  f.write(text)
+              print('updated    %s  (+%d rules from %d sources, %d kept lines)' % (path, added, nblocks, len(manual)))
+
+
+          def main():
+              ap = argparse.ArgumentParser()
+              ap.add_argument('--src', required=True, help='directory holding the pulled *.yaml files')
+              ap.add_argument('--root', default='.', help='repo root (custom branch checkout)')
+              args = ap.parse_args()
+
+              sources = collect(args.src)
+              total = sum(len(v) for _, r in sources for k in r.values() for v in k.values())
+              if not sources or total == 0:
+                  # refuse to continue, otherwise old merged blocks would be wiped
+                  print('::error::no usable rules were parsed from ' + args.src)
+                  sys.exit(1)
+              print('parsed %d rules from %d yaml files' % (total, len(sources)))
+
+              for kind, dirs in TARGETS.items():
+                  for d in dirs:
+                      for cat in CATEGORIES:
+                          path = os.path.join(args.root, d, 'my-%s.list' % cat)
+                          merge(path, kind, [(name, r[kind][cat]) for name, r in sources])
+
+
+          if __name__ == '__main__':
+              main()
+
+          PYEOF
+          python3 "$RUNNER_TEMP/clean_yaml.py" --src "$UPSTREAM_DIR" --root "$GITHUB_WORKSPACE"
+
+      # 5. 自动提交更改（内容无变化时不会产生提交）
+      - name: Auto Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@master
+        with:
+          commit_message: "chore: sync my-REJECT / my-DIRECT / my-IPLocation rules from upstream"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          file_pattern: geo geo-lite
