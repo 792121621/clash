@@ -159,6 +159,7 @@ jobs:
           REJECT_POLICIES = {'REJECT', 'REJECT-DROP'}
           DIRECT_POLICIES = {'DIRECT'}
           CATEGORIES = ['REJECT', 'DIRECT', 'IPLocation']      # -> my-<name>.list
+          IP_SUFFIX = ',no-resolve'    # geoip .list lines; set to '' to drop it
           TARGETS = {
               'site': ['geo/geosite', 'geo-lite/geosite'],
               'ip': ['geo/geoip', 'geo-lite/geoip'],
@@ -247,7 +248,7 @@ jobs:
 
 
           def fmt(kind, key):
-              return '%s,%s' % (key[0], key[1])
+              return '%s,%s%s' % (key[0], key[1], IP_SUFFIX if kind == 'ip' else '')
 
 
           def collect(src_dir):
