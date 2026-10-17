@@ -1,14 +1,15 @@
-# SOURCE: 哔哩哔哩.yaml
-DOMAIN,httpdns.bilivideo.com
+# 以下是乐播投屏更新地址
+# +.hpplay.cn
+activity.hpplay.cn #强制更新
+gslb.hpplay.cn #限制观看次数
+# hotupgrade.hpplay.cn
+# imdns.hpplay.cn
 
-# SOURCE: FakeLocationBiliBili.yaml
-DOMAIN-SUFFIX,httpdns.bilivideo.com
-DOMAIN-SUFFIX,httpdns.aliyuncs.com
+# 以下是Photoshop更新地址
+'*.adobestats.io' #3ubq3714f3.adobestats.io to8byuxf3g.adobestats.io
+# cc-api-data.adobe.io #不是
+ic.adobe.io
 
-# SOURCE: FakeLocationXiaoHongShu.yaml
-DOMAIN-SUFFIX,tracker.xiaohongshu.com
 
-# SOURCE: FakeLocationZhiHu.yaml
-DOMAIN-KEYWORD,httpdns
-DOMAIN-KEYWORD,httpsdns
-DOMAIN-KEYWORD,app-analytics-services
+
+
